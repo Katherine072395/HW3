@@ -1,0 +1,104 @@
+---
+`title: "ADA_HW2"
+author: "Katherine"
+date: "2020/8/31"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1 Import class one survey data from our Github site, calling the R dataframe that you create 
+
+
+```{r}
+install.packages("foreign") 
+install.packages("haven") 
+install.packages("readr") 
+library(foreign) #for reading spss (read.spss()), stata (read.dta()) and xpt (read.xport()) files
+library(haven) #for reading SPSS (read_sav()), stata (read_dta()), SAS(read_sas()) and xpt (read_xpt()) files
+library(readr) #for reading csv file (read_csv())
+library(knitr)
+library(curl)
+C1survey <- read_csv("https://raw.githubusercontent.com/kijohnson/ADA-FAll-2020/master/Class%20One/Class%201%20Survey%20Fall%202020.csv")
+```
+
+## 2 Determine: a. the number of observations (i.e. the number of people who filled out the survey) and b. the number of variables in the dataframe.
+
+
+```{r pressure, echo=FALSE}
+dim(C1survey)
+```
+
+## 3 Rename the column variables to something shorter and that is descriptive of what the variable is about (for example like_dogs for the ‘Do you like dogs?’ question variable) and b. Display that they are renamed.
+
+```{r}
+#Make a list of columnnames
+varlist<-colnames(C1survey)
+varlist
+
+names(C1survey) <- c("id","like_cats","like_dogs","desert_item","sologan","favor_day","lark_owl_hummingbird","favor_food","favorite_drink","favor_season", "favor_month", "hobby", "degree", "specilization", "software","R_level","comf_coding","time_coding","hope","major_area","favor_numb","birth_day","birth_month","country","state","city","edu_level")
+colnames(C1survey)
+```
+
+## 4 Write code to determine and display the number of factor, integer, numerical, and character variables there are in the C1survey dataset.
+
+```{r}
+sapply(C1survey, class)
+table(sapply(C1survey,class))
+```
+
+## 5. Using code, check the bday and bmonth variables for any unusual or missing values. If you find any, b. describe what you will do with the unusual values in a comment before or immediately following the code that does it, and c. after you have cleaned up any unusual values, find the median bday and month. *Note: please make sure that your bday and month variables are numeric before doing statistics
+```{r}
+#a. check unusual values
+list(C1survey$birth_day)
+list(C1survey$birth_month)
+
+#b.  
+install.packages("car") 
+library(car)
+C1survey$birth_day <- recode(C1survey$birth_day,"'26-Mar'=26;'report 19'=19")
+C1survey$birth_month <- recode(C1survey$birth_month, "'december'=12; 'August'=8;'March'=3")
+
+#check recode
+list(C1survey$birth_day)
+list(C1survey$birth_month)
+
+#c. Find the median 
+median(C1survey$birth_day, na.rm = TRUE)
+median(C1survey$birth_month, na.rm = TRUE)
+
+```
+
+
+## 6. a. Create a new variable called bseason that gives the season according to Northern Meteorological season in which respondents were born (winter=12/1 to 2/29, spring=3/1 to 5/31, summer=6/1 to 8/31, fall=9/1 to 11/30). b. Using the table function, print a table of Seasons in the columns and bmonths in the rows that allows you to check that the coding is correct c. Sum the columns using the addmargins function to answer the question of how many classmates were born in each season? Include your answer in 
+```{r}
+#a. create bseason
+C1survey$bseason <- recode(C1survey$birth_month,"12='winter';1='winter';2='winter';3='spring';4='spring'; 5='spring';6='summer';7='summer';8='summer';9='fall';10='fall';11='fall'")
+list(C1survey$bseason)
+list(C1survey$birth_month)
+
+#b. table
+Season_Month <- with(C1survey, table(birth_month, bseason, dnn = c("Month","Season")))
+Season_Month
+
+#c. addmargins
+addmargins(Season_Month)
+
+```
+
+
+
+## 7. Pick your favorite variable to analyze, come up with a question you want to answer with that variable, generate the code, and provide an answer to your question. Describe what you did using comments (i.e. #’s).  
+```{r}
+#a. what's the mean and median of the variable "What is your level of R experience (1=None, 5=Advanced)?" 
+
+#b. code
+mean(C1survey$R_level, na.rm=TRUE) #get mean
+median(C1survey$R_level, na.rm=TRUE) #get median
+
+#c result:
+# The results show that the mean of the students' R experience level is 2.125, and the median of students' R experience level is 2. It shows that the most of the students have the R experience but not much. 
+```
+
